@@ -1,13 +1,20 @@
 CC=gcc
+CFLAGS=-g
 
-all: testcase bfd
+all: testcase bfd dwarf
 
 bfd: bfd.o
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ -lbfd
 
 testcase: testcase.o
 	$(CC) -o $@ $^
 
-.PHONY: test
+dwarf: dwarfreader.o
+	$(CC) -o $@ $^ -ldwarf -lelf
+
+.PHONY: test clean
 test: all
 	./bfd testcase
+
+clean:
+	rm -f *.o testcase bfd

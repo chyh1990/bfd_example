@@ -25,23 +25,26 @@ struct s1{
 };
 
 struct s2{
-  int a;
-  int b;
-  char * c;
-  unsigned long d;
-  long long e;
+  int s2_a;
+  int s2_b;
+  char * s2_c;
+  unsigned long s2_d;
+  long long s2_e;
   union{
-    int a;
-    void *b;
+    int s2_u_a;
+    void *s2_u_b;
   }u;
-  struct s1 s;
+  struct s1 s2_s;
 };
+
+struct s2 gFoo = {2,3};
 
 int main(int argc, char* argv[])
 {
   struct s2 foo;
   memset(&foo, 0, sizeof(struct s2));
-  printf("FOO %d\n", foo.a);
+  printf("sizeof(foo)=%d\n", (int)sizeof(foo));
+  printf("foo.s2_a=%d\n", foo.s2_a);
   return 0;
 }
 
