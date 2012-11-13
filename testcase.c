@@ -34,6 +34,7 @@ struct s2{
     int s2_u_a;
     void *s2_u_b;
   }u;
+  char s2_big[1024];
   struct s1 s2_s;
 };
 

@@ -1,28 +1,28 @@
 /*
-  Copyright (c) 2009-2010 David Anderson.  All rights reserved.
- 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-  * Redistributions of source code must retain the above copyright
-    notice, this list of conditions and the following disclaimer.
-  * Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-  * Neither the name of the example nor the
-    names of its contributors may be used to endorse or promote products
-    derived from this software without specific prior written permission.
- 
-  THIS SOFTWARE IS PROVIDED BY David Anderson ''AS IS'' AND ANY
-  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL David Anderson BE LIABLE FOR ANY
-  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
+   Copyright (c) 2009-2010 David Anderson.  All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the example nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY David Anderson ''AS IS'' AND ANY
+ EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL David Anderson BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 */
 /*  simplereader.c
     This is an example of code reading dwarf .debug_info.
@@ -33,9 +33,12 @@
     option adds some extra printing.
 
     To use, try
-        make
-        ./simplereader simplereader
-*/
+    make
+    ./simplereader simplereader
+    */
+
+/* modified by Chen Yuheng */
+
 #include <sys/types.h> /* For open() */
 #include <sys/stat.h>  /* For open() */
 #include <fcntl.h>     /* For open() */
@@ -48,56 +51,56 @@
 #include "libdwarf.h"
 
 struct srcfilesdata {
-    char ** srcfiles;
-    Dwarf_Signed srcfilescount;
-    int srcfilesres;
+  char ** srcfiles;
+  Dwarf_Signed srcfilescount;
+  int srcfilesres;
 };
 
 static void read_cu_list(Dwarf_Debug dbg);
 static void print_die_data(Dwarf_Debug dbg, Dwarf_Die print_me,int level,
-   struct srcfilesdata *sf);
+    struct srcfilesdata *sf);
 static void get_die_and_siblings(Dwarf_Debug dbg, Dwarf_Die in_die,int in_level,
-   struct srcfilesdata *sf);
+    struct srcfilesdata *sf);
 static void resetsrcfiles(Dwarf_Debug dbg,struct srcfilesdata *sf);
 
 static int namesoptionon = 0;
 
-int 
+  int 
 main(int argc, char **argv)
 {
 
-    Dwarf_Debug dbg = 0;
-    int fd = -1;
-    const char *filepath = "<stdin>";
-    int res = DW_DLV_ERROR;
-    Dwarf_Error error;
-    Dwarf_Handler errhand = 0;
-    Dwarf_Ptr errarg = 0;
+  Dwarf_Debug dbg = 0;
+  int fd = -1;
+  const char *filepath = "<stdin>";
+  int res = DW_DLV_ERROR;
+  Dwarf_Error error;
+  Dwarf_Handler errhand = 0;
+  Dwarf_Ptr errarg = 0;
 
-    if(argc < 2) {
-        fd = 0; /* stdin */
-    } else {
-        int i = 0;
-        for(i = 1; i < (argc-1) ; ++i) {
-            if(strcmp(argv[i],"--names") == 0) {
-                namesoptionon=1;
-            } else {
-                printf("Unknown argument \"%s\" ignored\n",argv[i]);
-            }
-        }
-        filepath = argv[i];
-        fd = open(filepath,O_RDONLY);
+  if(argc < 2) {
+    fd = 0; /* stdin */
+  } else {
+    int i = 0;
+    for(i = 1; i < (argc-1) ; ++i) {
+      if(strcmp(argv[i],"--names") == 0) {
+        namesoptionon=1;
+      } else {
+        printf("Unknown argument \"%s\" ignored\n",argv[i]);
+      }
     }
-    if(argc > 2) {
-    }
-    if(fd < 0) {
-        printf("Failure attempting to open \"%s\"\n",filepath);
-    }
-    res = dwarf_init(fd,DW_DLC_READ,errhand,errarg, &dbg,&error);
-    if(res != DW_DLV_OK) {
-        printf("Giving up, cannot do DWARF processing\n");
-        exit(1);
-    }
+    filepath = argv[i];
+    fd = open(filepath,O_RDONLY);
+  }
+  if(argc > 2) {
+  }
+  if(fd < 0) {
+    printf("Failure attempting to open \"%s\"\n",filepath);
+  }
+  res = dwarf_init(fd,DW_DLC_READ,errhand,errarg, &dbg,&error);
+  if(res != DW_DLV_OK) {
+    printf("Giving up, cannot do DWARF processing\n");
+    exit(1);
+  }
 
     read_cu_list(dbg);
     res = dwarf_finish(dbg,&error);
@@ -227,6 +230,7 @@ get_number(Dwarf_Attribute attr,Dwarf_Unsigned *val)
     }
     return;
 }
+#if 0
 static void
 print_subprog(Dwarf_Debug dbg,Dwarf_Die die, int level,
     struct srcfilesdata *sf)
@@ -316,68 +320,241 @@ print_comp_dir(Dwarf_Debug dbg,Dwarf_Die die,int level, struct srcfilesdata *sf)
     }
     dwarf_dealloc(dbg,attrbuf,DW_DLA_LIST);
 }
+#endif
 
-static void
-resetsrcfiles(Dwarf_Debug dbg,struct srcfilesdata *sf)
+
+static int
+get_form_values(Dwarf_Attribute attrib,
+  Dwarf_Half *theform, Dwarf_Half *directform)
 {
-    Dwarf_Signed sri = 0;
-    for (sri = 0; sri < sf->srcfilescount; ++sri) {
-        dwarf_dealloc(dbg, sf->srcfiles[sri], DW_DLA_STRING);
-    }
-    dwarf_dealloc(dbg, sf->srcfiles, DW_DLA_LIST);
-    sf->srcfilesres = DW_DLV_ERROR;
-    sf->srcfiles = 0;
-    sf->srcfilescount = 0;
+    Dwarf_Error err = 0;
+    int res = dwarf_whatform(attrib, theform, &err);
+    dwarf_whatform_direct(attrib, directform, &err);
+    return res;
 }
 
-static void
+static void print_member(Dwarf_Debug dbg,Dwarf_Die die, int level,
+    struct srcfilesdata *sf)
+{
+    int res;
+    Dwarf_Error error = 0;
+    Dwarf_Attribute *attrbuf = 0;
+    Dwarf_Addr lowpc = 0;
+    Dwarf_Addr highpc = 0;
+    Dwarf_Signed attrcount = 0;
+    Dwarf_Unsigned i, j;
+    Dwarf_Unsigned filenum = 0;
+    Dwarf_Unsigned linenum = 0;
+    char *filename = 0;
+
+    Dwarf_Block *tempb = NULL;
+    Dwarf_Die type_die = NULL;
+
+    res = dwarf_attrlist(die,&attrbuf,&attrcount,&error);
+
+    if(res != DW_DLV_OK) {
+        return;
+    }
+    for(i = 0; i < attrcount ; ++i) {
+        Dwarf_Half aform;
+        res = dwarf_whatattr(attrbuf[i],&aform,&error);
+        if(res == DW_DLV_OK) {
+            if(aform == DW_AT_decl_file) {
+                get_number(attrbuf[i],&filenum);
+            }
+            if(aform == DW_AT_decl_line) {
+                get_number(attrbuf[i],&linenum);
+            }
+            if(aform == DW_AT_type){
+              Dwarf_Half theform = 0;
+              Dwarf_Half directform = 0;
+              Dwarf_Half version = 0;
+              Dwarf_Off off = 0;
+
+              get_form_values(attrbuf[i], &theform, &directform);
+              int wres = dwarf_formref(attrbuf[i], &off, &error);
+              if(wres != DW_DLV_OK){
+                printf("ERROR dwarf_former\n");
+                continue;
+              }
+              //wres = dwarf_whatattr(attrbuf[i], &attr, &error);
+              wres = dwarf_offdie(dbg, off, &type_die, &error);
+              if(wres != DW_DLV_OK){
+                printf("ERROR dwarf_offdie_b\n");
+                continue;
+              }
+            }
+            if(aform == DW_AT_data_member_location){
+              Dwarf_Half theform = aform;
+              Dwarf_Half directform = 0;
+              Dwarf_Half version = 0;
+              Dwarf_Half offset_size = 0;
+
+              get_form_values(attrbuf[i], &theform, &directform);
+              int wres = dwarf_get_version_of_die(die ,
+                  &version,&offset_size);
+              if(wres != DW_DLV_OK) {
+                printf("Cannot get DIE context version number %d\n",wres);
+                continue;
+              }
+              enum Dwarf_Form_Class fc = dwarf_get_form_class(version, 1,
+              offset_size,theform);
+              if(fc == DW_FORM_CLASS_BLOCK) {
+                //wres = formxdata_print_value(dbg,attrib,valname,
+                //    &err,false);
+                //show_form_itself(show_form_used,verbose, 
+                //    theform, directform,&valname);
+                wres = dwarf_formblock(attrbuf[i], &tempb, &error);
+                if(wres!=DW_DLV_OK)
+                  continue;
+
+              }
+
+            }
+        }
+        dwarf_dealloc(dbg,attrbuf[i],DW_DLA_ATTR);
+    }
+    //printf("MEMBER: type:0x%x\n", type);
+    // output
+    if(tempb){
+      printf("    %d bytes BLOCK hexdump:", (int)tempb->bl_len);
+      unsigned char* data = (unsigned char*)tempb->bl_data;
+      for(j=0;j<tempb->bl_len;j++)
+        printf("%02x ", (unsigned int)*(data + j));
+      if(data[0] == DW_OP_plus_uconst){
+        const char *opname = NULL;
+        unsigned int offset = 0;
+        dwarf_get_OP_name(data[0], &opname);
+        //leb128
+        //FIXME, overflow
+        for(j=1;j<tempb->bl_len;j++){
+          unsigned int t = (unsigned int)data[j];
+          offset += (t & 0x7f) << (7*(j-1));
+          if(!(t & 0x80))
+            break;
+        }
+        printf("<%s: +0x%x, %d> ", opname, (unsigned int)offset, (unsigned int)offset);
+      }else{
+        printf("    <Fail to parse> ");
+      }
+      dwarf_dealloc(dbg, tempb, DW_DLA_BLOCK);
+    }else{
+      printf("    <No offset info> ");
+    }
+    if(type_die){
+      Dwarf_Half type_tag = 0;
+      dwarf_tag(type_die,&type_tag,&error);
+
+      res = dwarf_attrlist(type_die,&attrbuf,&attrcount,&error);
+
+      if(res != DW_DLV_OK) {
+        return;
+      }
+      char* typename = NULL;
+      Dwarf_Unsigned byte_size = 0;
+      for(i = 0; i < attrcount ; ++i) {
+        Dwarf_Half aform;
+        res = dwarf_whatattr(attrbuf[i],&aform,&error);
+        if(res == DW_DLV_OK) {
+          if(aform == DW_AT_name){
+            dwarf_formstring(attrbuf[i], &typename, &error);
+          }
+          if(aform == DW_AT_byte_size){
+            get_number(attrbuf[i], &byte_size);
+          }
+        }
+        dwarf_dealloc(dbg,attrbuf[i],DW_DLA_ATTR);
+      }
+      if(typename == NULL)
+        dwarf_get_TAG_name(type_tag, &typename);
+      dwarf_dealloc(dbg, type_die, DW_DLA_DIE);
+      printf("<Type: %s, byte_size:%u> ", typename, (unsigned int)byte_size);
+    }else{
+      printf("    <No type info> ");
+    }
+    printf("\n");
+    dwarf_dealloc(dbg,attrbuf,DW_DLA_LIST);
+}
+
+  static void
+resetsrcfiles(Dwarf_Debug dbg,struct srcfilesdata *sf)
+{
+  Dwarf_Signed sri = 0;
+  for (sri = 0; sri < sf->srcfilescount; ++sri) {
+    dwarf_dealloc(dbg, sf->srcfiles[sri], DW_DLA_STRING);
+  }
+  dwarf_dealloc(dbg, sf->srcfiles, DW_DLA_LIST);
+  sf->srcfilesres = DW_DLV_ERROR;
+  sf->srcfiles = 0;
+  sf->srcfilescount = 0;
+}
+
+  static void
 print_die_data(Dwarf_Debug dbg, Dwarf_Die print_me,int level,
     struct srcfilesdata *sf)
 {
-    char *name = 0;
-    Dwarf_Error error = 0;
-    Dwarf_Half tag = 0;
-    const char *tagname = 0;
-    int localname = 0;
+  char *name = 0;
+  Dwarf_Error error = 0;
+  Dwarf_Half tag = 0;
+  const char *tagname = 0;
+  int localname = 0;
 
-    int res = dwarf_diename(print_me,&name,&error);
+  int res = dwarf_diename(print_me,&name,&error);
 
-    if(res == DW_DLV_ERROR) {
-        printf("Error in dwarf_diename , level %d \n",level);
-        exit(1);
-    }
-    if(res == DW_DLV_NO_ENTRY) {
-        name = "<no DW_AT_name attr>";
-        localname = 1;
-    }
-    res = dwarf_tag(print_me,&tag,&error);
-    if(res != DW_DLV_OK) {
-        printf("Error in dwarf_tag , level %d \n",level);
-        exit(1);
-    }
-    res = dwarf_get_TAG_name(tag,&tagname);
-    if(res != DW_DLV_OK) {
-        printf("Error in dwarf_get_TAG_name , level %d \n",level);
-        exit(1);
-    }
-    if(namesoptionon) {
-        if( tag == DW_TAG_subprogram) {
-            printf(    "<%3d> subprogram            : \"%s\"\n",level,name);
-            print_subprog(dbg,print_me,level,sf);
-        } else if (tag == DW_TAG_compile_unit ||
-            tag == DW_TAG_partial_unit ||
-            tag == DW_TAG_type_unit) {
+  if(res == DW_DLV_ERROR) {
+    printf("Error in dwarf_diename , level %d \n",level);
+    exit(1);
+  }
+  if(res == DW_DLV_NO_ENTRY) {
+    name = "<no DW_AT_name attr>";
+    localname = 1;
+  }
+  res = dwarf_tag(print_me,&tag,&error);
+  if(res != DW_DLV_OK) {
+    printf("Error in dwarf_tag , level %d \n",level);
+    exit(1);
+  }
+  res = dwarf_get_TAG_name(tag,&tagname);
+  if(res != DW_DLV_OK) {
+    printf("Error in dwarf_get_TAG_name , level %d \n",level);
+    exit(1);
+  }
+  /*
+     if(namesoptionon) {
+     if( tag == DW_TAG_subprogram) {
+     printf(    "<%3d> subprogram            : \"%s\"\n",level,name);
+     print_subprog(dbg,print_me,level,sf);
+     } else if (tag == DW_TAG_compile_unit ||
+     tag == DW_TAG_partial_unit ||
+     tag == DW_TAG_type_unit) {
 
-            resetsrcfiles(dbg,sf);
-            printf(    "<%3d> source file           : \"%s\"\n",level,name);
-            print_comp_dir(dbg,print_me,level,sf);
-        }
-    } else {
-        printf("<%d> tag: %d %s  name: \"%s\"\n",level,tag,tagname,name);
-    }
-    if(!localname) {
-        dwarf_dealloc(dbg,name,DW_DLA_STRING);
-    }
+     resetsrcfiles(dbg,sf);
+     printf(    "<%3d> source file           : \"%s\"\n",level,name);
+     print_comp_dir(dbg,print_me,level,sf);
+     }
+     } else {
+     */
+
+printf("<%d> tag: %d %s  name: \"%s\"\n",level,tag,tagname,name);
+if(tag == DW_TAG_member){
+  print_member(dbg, print_me, level, sf);
+}
+if(tag == DW_TAG_structure_type){
+  unsigned int size = 0;
+  Dwarf_Attribute attr;
+  res = dwarf_attr(print_me, DW_AT_byte_size, &attr, &error); 
+  if(res == DW_DLV_OK){
+    get_number(attr, &size);
+    dwarf_dealloc(dbg, attr,DW_DLA_ATTR);
+  }
+  printf("    Structure: size=%d\n", size);
+}
+/*
+   }
+   */
+if(!localname) {
+  dwarf_dealloc(dbg,name,DW_DLA_STRING);
+}
 }
 
 

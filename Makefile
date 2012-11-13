@@ -15,6 +15,7 @@ dwarf: dwarfreader.o
 .PHONY: test clean
 test: all
 	./bfd testcase
+	./dwarf testcase
 
 clean:
 	rm -f *.o testcase bfd
